@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Backbone</title>
+    <!-- === Styles Twitter Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet">
+    <style>
+    .slack {
+      background-color: #563A59;
+    }
+    </style>
+  </head>
+  <body>
+
+    <div class="container-fluid">
+     <div class="row">
+       <div class="col-sm-12 main">
+         <h1 class="page-header">Dashboard</h1>
+         <script type="text/template" id="articles-collection-template" >
+          <% _.each(articles, function (article) { %>
+            <h1><%= article.id %></h1>
+            <h6><%= article.title %></h6>
+            <p><%= article.description %></p>
+          <% }); %>
+          </script>
+          <!-- les données seront affichées ici -->
+          <div id="articles-collection-container" ></div>
+       </div>
+     </div>
+   </div>
+  </body>
+  <!-- === Références aux Frameworks === -->
+  <script src="js/jquery.js"></script>
+  <script src="js/underscore.js"></script>
+  <script src="js/backbone.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <!-- === ici votre code applicatif === -->
+  <script>
+    var Article = Backbone.Model.extend({
+      defaults: {
+          "id": "0",
+          "title": "Titre par défaut",
+          "description": "ma description"
+      },
+
+      initialize: function() {
+        console.log('Here init Article model');
+      },
+    });
+
+    ArticlesCollection = Backbone.Collection.extend({
+      model : Article,
+      initialize : function () {
+        console.log("Création d’une collection d’articles");
+      }
+    });
+
+    ArticlesView = Backbone.View.extend({
+        el: $("#articles-collection-container"),
+
+        initialize: function () {
+          this.template = _.template($("#articles-collection-template").html());
+
+          _.bindAll(this , "render");
+          this.collection.bind("change", this.render);
+          this.collection.bind("add", this.render);
+          this.collection.bind("remove", this.render);
+        },
+
+        render: function () {
+          var renderedContent = this.template({ articles : this.collection.toJSON() });
+          $(this.el).html(renderedContent);
+          return this;
+        }
+
+    });
+
+    var articleCollection = new ArticlesCollection;
+    articleCollection.add( new Article({ id:15, title:"mon title" }) );
+    articleCollection.add( new Article({ id:14, title:"super" }) );
+    articleCollection.add( new Article({ id:16, title:"génial" }) );
+
+    articleView = new ArticlesView({ collection: articleCollection });
+    articleView.render();
+
+  </script>
+</html>
