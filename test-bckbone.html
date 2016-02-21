@@ -40,6 +40,8 @@
   <!-- === ici votre code applicatif === -->
   <script>
     var Article = Backbone.Model.extend({
+      urlRoot: "/article",
+
       defaults: {
           "id": "0",
           "title": "Titre par défaut",
@@ -48,7 +50,11 @@
 
       initialize: function() {
         console.log('Here init Article model');
+        this.on("change:title", function() {
+          console.log('title has changed : ' + this.get('title'));
+        });
       },
+
     });
 
     ArticlesCollection = Backbone.Collection.extend({
@@ -85,6 +91,9 @@
 
     articleView = new ArticlesView({ collection: articleCollection });
     articleView.render();
+
+    //articleCollection.models[0].set('title', 'Allo')
+    //articleCollection.models[0].save()
 
   </script>
 </html>
