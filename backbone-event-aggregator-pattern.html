@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Backbone</title>
+    <!-- === Styles Twitter Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet">
+    <style>
+    .slack {
+      background-color: #563A59;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+     <div class="row">
+       <div class="col-sm-12 main">
+         <h1 class="page-header">Dashboard</h1>
+         <script type="text/template" id="view-one-template">
+           <h2>View one</h2>
+           <p>Some text</p>
+           <p>
+             <a href="#" id="link-one">link one</a>
+             <a href="#" id="link-two">link two</a>
+           </p>
+         </script>
+         <script type="text/template" id="view-two-template">
+           <h2>View two</h2>
+            <p>
+              Status
+              <%= status %>
+            </p>
+         </script>
+         <!-- les données seront affichées ici -->
+         <div id="view-one-container" ></div>
+         <div class="clearfix"></div>
+         <div id="view-two-container" ></div>
+       </div>
+     </div>
+   </div>
+  </body>
+  <!-- === Références aux Frameworks === -->
+  <script src="js/jquery.js"></script>
+  <script src="js/underscore.js"></script>
+  <script src="js/backbone.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <!-- === ici votre code applicatif === -->
+  <script>
+    var vent = _.extend({}, Backbone.Events);
+
+    ViewOne = Backbone.View.extend({
+        el: $("#view-one-container"),
+
+        initialize: function (options) {
+          this.initEvent(options);
+          this.template = _.template($("#view-one-template").html());
+        },
+
+        initEvent: function(options) {
+          this.vent = options.vent;
+          var _this = this;
+          this.vent.on("container_updated", function(msg){
+            alert(msg);
+          });
+        },
+
+        events: {
+          "click #link-one": "triggerEventOne",
+          "click #link-two": "triggerEventTwo"
+        },
+
+        triggerEventOne : function(e) {
+          e.preventDefault();
+          this.vent.trigger("alert", "event one triggered");
+        },
+
+        triggerEventTwo : function(e) {
+          e.preventDefault();
+          this.vent.trigger("alert", "event two triggered");
+        },
+
+        render: function () {
+          var renderedContent = this.template();
+          $(this.el).html(renderedContent);
+          return this;
+        }
+
+    });
+
+    ViewTwo = Backbone.View.extend({
+        el: $("#view-two-container"),
+        status: 'default',
+
+        initialize: function (options) {
+          this.initEvent(options);
+          this.template = _.template($("#view-two-template").html());
+        },
+
+        initEvent: function(options) {
+          this.vent = options.vent;
+          var _this = this;
+          this.vent.on("alert", function(msg) {
+            console.log(_this.vent);
+            _this.status = msg;
+            _this.render();
+            _this.vent.trigger("container_updated", "ok message received and container updated");
+          });
+        },
+
+        render: function () {
+          var renderedContent = this.template({ status : this.status });
+          $(this.el).html(renderedContent);
+          return this;
+        }
+
+    });
+
+    viewOne = new ViewOne({ vent: vent });
+    viewTwo = new ViewTwo({ vent: vent });
+    viewOne.render();
+    viewTwo.render();
+  </script>
+</html>
