@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Backbone</title>
+    <!-- === Styles Twitter Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet">
+    <style>
+    .slack {
+      background-color: #563A59;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+     <div class="row">
+       <div class="col-sm-12 main">
+         <h1 class="page-header">Dashboard</h1>
+         <form id="create-user">
+           <input type="text" value="" placeholder="Add new user" name="article" />
+           <button type="submit">Ajouter</button>
+         </form>
+         <script type="text/template" id="article-tpl" >
+            <h1><%= article.id %></h1>
+            <h6><%= article.title %></h6>
+            <p><%= article.description %></p>
+            <button class="edit">Edit</button>
+	          <button class="delete">Delete</button>
+          </script>
+          <!-- les données seront affichées ici -->
+          <div id="articles-collection-container" ></div>
+       </div>
+     </div>
+   </div>
+  </body>
+  <!-- === Références aux Frameworks === -->
+  <script src="js/jquery.js"></script>
+  <script src="js/underscore.js"></script>
+  <script src="js/backbone.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <!-- === ici votre code applicatif === -->
+  <script>
+    window.App = {
+      Models: {},
+      Collections: {},
+      Views: {}
+    };
+
+    App.Models.Article = Backbone.Model.extend({
+      defaults: {
+          "id": "0",
+          "title": "Titre par défaut",
+          "description": "ma description"
+      },
+
+      initialize: function() {
+        console.log('Here init Article model');
+        this.on("change:title", function() {
+          console.log('title has changed : ' + this.get('title'));
+        });
+      }
+    });
+
+    App.Collections.Article = Backbone.Collection.extend({
+      model : App.Models.Article,
+      initialize : function () {
+        console.log("Création d’une collection d’articles");
+      }
+    });
+
+    App.Views.Articles = Backbone.View.extend({
+        el: "#articles-collection-container",
+        initialize: function () {
+          this.collection.on('add', this.printArticle, this);
+        },
+
+        render: function () {
+          this.collection.each(this.printArticle, this);
+        },
+
+        printArticle: function(article) {
+          var articleView = new App.Views.Article({ model: article });
+    		  $(this.el).append(articleView.render().el);
+        }
+    });
+
+    App.Views.Article = Backbone.View.extend({
+        initialize: function () {
+          this.template = _.template($("#article-tpl").html());
+          this.model.on('change', this.render, this);
+          this.model.on('remove', this.remove, this);
+        },
+
+        events: {
+      	 'click .edit'   : 'editArticle',
+         'click .delete' : 'deleteArticle'
+        },
+
+        editArticle: function() {
+          var newTitle = prompt("Please enter the new name", this.model.get('title'));
+          if( !newTitle ) return;
+	        this.model.set('title', newTitle);
+        },
+
+        deleteArticle: function() {
+          // Will not trigger sync stuff !!
+          console.log('Model ' + this.model.get('id') + ' deleted');
+          this.model.set('id', null);
+          this.model.destroy();
+        },
+
+        remove: function() {
+      		$(this.el).remove();
+      	},
+
+        render: function () {
+          var renderedContent = this.template({ article : this.model.toJSON() });
+          $(this.el).html(renderedContent);
+          return this;
+        }
+    });
+
+    App.Views.AddUser = Backbone.View.extend({
+      el: "#create-user",
+      events: {
+        "submit": "submit"
+      },
+
+      submit:function(e) {
+        e.preventDefault();
+        var articleName = $(e.target).find('input[name="article"]').val();
+        var article = new App.Models.Article({ title: articleName });
+        this.collection.add( article );
+      }
+    });
+
+    var articleCollection = new App.Collections.Article;
+    articleCollection.add( new App.Models.Article({ id:15, title:"Title 1" }) );
+    articleCollection.add( new App.Models.Article({ id:14, title:"Title 2" }) );
+    articleCollection.add( new App.Models.Article({ id:16, title:"Title 3" }) );
+
+    articleView = new App.Views.Articles({ collection: articleCollection });
+    addUserView = new App.Views.AddUser({ collection: articleCollection });
+    articleView.render();
+  </script>
+</html>

@@ -38,7 +38,13 @@
   <script src="js/bootstrap.min.js"></script>
   <!-- === ici votre code applicatif === -->
   <script>
-    var Article = Backbone.Model.extend({
+    window.App = {
+      Models: {},
+      Collections: {},
+      Views: {}
+    };
+
+    App.Models.Article = Backbone.Model.extend({
       defaults: {
           "id": "0",
           "title": "Titre par défaut",
@@ -47,18 +53,17 @@
 
       initialize: function() {
         console.log('Here init Article model');
-      },
-
+      }
     });
 
-    ArticlesCollection = Backbone.Collection.extend({
-      model : Article,
+    App.Collections.Article = Backbone.Collection.extend({
+      model : App.Models.Article,
       initialize : function () {
         console.log("Création d’une collection d’articles");
       }
     });
 
-    ArticlesView = Backbone.View.extend({
+    App.Views.Article = Backbone.View.extend({
         el: $("#articles-collection-container"),
 
         initialize: function () {
@@ -68,18 +73,19 @@
         render: function () {
           var renderedContent = this.template({ articles : this.collection.toJSON() });
           $(this.el).html(renderedContent);
-          return this;
         }
 
     });
 
-    var articleCollection = new ArticlesCollection;
-    articleCollection.add( new Article({ id:15, title:"Title 1" }) );
-    articleCollection.add( new Article({ id:14, title:"Title 2" }) );
-    articleCollection.add( new Article({ id:16, title:"Title 3" }) );
+    var articleCollection = new App.Collections.Article;
+    articleCollection.add( new App.Models.Article({ id:15, title:"Title 1" }) );
+    articleCollection.add( new App.Models.Article({ id:14, title:"Title 2" }) );
+    articleCollection.add( new App.Models.Article({ id:16, title:"Title 3" }) );
 
-    articleView = new ArticlesView({ collection: articleCollection });
+    articleView = new App.Views.Article({ collection: articleCollection });
     articleView.render();
+    // Models / Collections / Views are available in console
+    // try type App.Models
 
   </script>
 </html>

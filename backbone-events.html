@@ -14,7 +14,9 @@
     </style>
   </head>
   <body>
-    Hello
+    <div class="container">
+      <p id="test">Hello</p>
+    </div>
   </body>
   <!-- === Références aux Frameworks === -->
   <script src="js/jquery.js"></script>
@@ -29,7 +31,7 @@
     _.extend(object, Backbone.Events);
 
     object.on("alert", function(msg) {
-      alert("Triggered " + msg);
+      jQuery('#test').append("Backbone Event triggered " + msg);
     });
 
     object.trigger("alert", "an event");

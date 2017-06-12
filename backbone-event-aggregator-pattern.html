@@ -18,6 +18,7 @@
      <div class="row">
        <div class="col-sm-12 main">
          <h1 class="page-header">Dashboard</h1>
+         <p>Propager les évènements d'un conteneur 1 vers un conteneur 2</p>
          <script type="text/template" id="view-one-template">
            <h2>View one</h2>
            <p>Some text</p>
@@ -62,7 +63,7 @@
           this.vent = options.vent;
           var _this = this;
           this.vent.on("container_updated", function(msg){
-            alert(msg);
+            alert('view2 send ' + msg);
           });
         },
 
@@ -103,7 +104,7 @@
           var _this = this;
           this.vent.on("alert", function(msg) {
             console.log(_this.vent);
-            _this.status = msg;
+            _this.status = 'message received from view 1 ' + msg;
             _this.render();
             _this.vent.trigger("container_updated", "ok message received and container updated");
           });
